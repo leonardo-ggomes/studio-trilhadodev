@@ -1,0 +1,486 @@
+/* studio.css - Interface do Editor TrilhaDoDev */
+
+:root {
+    --admin-bg: #f0f2f5;
+    --admin-sidebar: #ffffff;
+    --admin-accent: #127894;
+    /* Cor principal da sua trilha */
+    --admin-border: #e5e7eb;
+    --admin-text: #1f2937;
+    --danger: #ff4b4b;
+}
+
+body.admin-page {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    font-family: 'Nunito', sans-serif;
+    margin: 0;
+    overflow: hidden;
+    /* O scroll será apenas no canvas */
+}
+
+/* --- Layout Principal --- */
+.admin-controls {
+    height: 70px;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    border-bottom: 2px solid var(--admin-border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 100;
+}
+
+.studio-container {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    height: calc(100vh - 70px);
+}
+
+/* --- Toolbox (Lateral Esquerda) --- */
+.toolbox {
+    background: var(--admin-sidebar);
+    border-right: 2px solid var(--admin-border);
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.toolbox h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+}
+
+.draggable-item {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--admin-border);
+    margin-bottom: 12px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+    font-weight: 700;
+}
+
+.draggable-item i {
+    color: var(--admin-accent);
+    width: 20px;
+    text-align: center;
+}
+
+.draggable-item:hover {
+    border-color: var(--admin-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(18, 120, 148, 0.1);
+}
+
+.draggable-item:active {
+    cursor: grabbing;
+}
+
+/* --- Canvas (Área Central) --- */
+#editor-container {
+    padding: 40px 20px;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.items-drop-zone {
+    width: 100%;
+    max-width: 600px;
+    /* Alinhado com seu style.css para lições */
+    min-height: 80vh;
+    background: transparent;
+    border: 2px dashed transparent;
+    border-radius: 20px;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+.drag-over-zone {
+    border-color: var(--admin-accent);
+    background: rgba(18, 120, 148, 0.05);
+}
+
+.canvas-hint {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* --- Edit Wrapper (Controles de cada bloco no Canvas) --- */
+.edit-wrapper {
+    position: relative;
+    margin-bottom: 25px;
+    padding: 10px;
+    border-radius: 16px;
+    transition: 0.2s;
+}
+
+.edit-wrapper:hover {
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 2px var(--admin-accent);
+}
+
+.edit-controls {
+    position: absolute;
+    right: -50px;
+    top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.edit-wrapper:hover .edit-controls {
+    opacity: 1;
+    right: -45px;
+}
+
+.btn-control {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: 0.2s;
+}
+
+.btn-control.delete:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.drag-handle {
+    cursor: move;
+    color: #9ca3af;
+}
+
+/* --- Properties Panel (Lateral Direita) --- */
+.properties-panel {
+    background: var(--admin-sidebar);
+    border-left: 2px solid var(--admin-border);
+    padding: 1.5rem;
+}
+
+/* Editor In-place */
+[contenteditable="true"] {
+    cursor: text;
+    padding: 5px;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+[contenteditable="true"]:hover {
+    background: rgba(18, 120, 148, 0.03);
+}
+
+[contenteditable="true"]:focus {
+    outline: 2px solid rgba(18, 120, 148, 0.2);
+    background: white;
+}
+
+/* Esconder elementos de admin no modo Preview */
+.preview-mode .toolbox,
+.preview-mode .properties-panel,
+.preview-mode .edit-controls {
+    display: none;
+}
+
+.preview-mode .studio-container {
+    grid-template-columns: 1fr;
+}
+
+.color-dot {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.color-dot:hover {
+    transform: scale(1.2);
+    border-color: #000;
+}
+
+.card-image img {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Garante que listas no editor mantenham o estilo do Duolingo */
+.feature-list {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.toolbox-title {
+    font-size: 11px;
+    color: #999;
+    margin: 20px 0 10px 0;
+    text-transform: uppercase;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.btn-group-studio {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-group-studio button {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+}
+
+.btn-group-studio button:hover {
+    background: #f0f0f0;
+}
+
+/* Badge no editor */
+.tech-badge span {
+    font-weight: 800;
+}
+
+/* Realçar elemento selecionado no editor */
+[data-id].selected-edit {
+    outline: 2px solid var(--admin-accent);
+    outline-offset: 4px;
+    background: rgba(28, 176, 246, 0.05);
+}
+
+.properties-panel input,
+.properties-panel select {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0 20px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.properties-panel label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #666;
+}
+
+/* Faz os componentes ocuparem todo o espaço da coluna do grid */
+.card-grid .edit-wrapper {
+    width: 100%;
+    margin-bottom: 0;
+    /* No grid, o gap controla o espaçamento */
+}
+
+.card-grid .modern-terminal,
+.card-grid .info-box-blue,
+.card-grid .card-text {
+    width: 100% !important;
+    min-width: 0;
+    /* Evita que o conteúdo estique a coluna */
+}
+
+/* Feedback visual de que o grid aceita itens */
+.drop-zone-nested {
+    border: 2px dashed #cbd5e1;
+    background: rgba(248, 250, 252, 0.8);
+    transition: 0.2s;
+}
+
+.drop-zone-nested:hover {
+    border-color: var(--admin-accent);
+    background: white;
+}
+
+/* Quando arrasta algo sobre um grid específico */
+.drop-zone-nested:hover {
+    outline: 2px solid var(--primary);
+    background: rgba(88, 204, 2, 0.05);
+}
+
+.edit-controls.small {
+    padding: 2px;
+}
+
+.btn-delete-item {
+    background: #ff4b4b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+}
+
+/* Estilo Minimalista para o Badge */
+.tech-badge.badge-flat {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.tech-badge.badge-flat i {
+    font-size: 1.5rem;
+    /* Opcional: aumentar um pouco o ícone quando estiver sozinho */
+}
+
+/* Garante que a imagem redimensionada fique centralizada se for menor que 100% */
+.card-image img {
+    display: block;
+    margin: 0 auto;
+    transition: width 0.3s ease;
+}
+
+.quiz-container {
+    background: white;
+    border: 2px solid #e5e5e5;
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.quiz-description {
+    color: #777;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.quiz-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.option-item {
+    border: 2px solid #e5e5e5;
+    border-bottom: 4px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.option-item[data-correct="true"] {
+    border-color: #1cb0f6;
+    background: #f1f9ff;
+    border-bottom-color: #1cb0f6;
+}
+
+.option-letter {
+    font-weight: 900;
+    color: #afafaf;
+    border: 2px solid #e5e5e5;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+}
+
+.option-item[data-correct="true"] .option-letter {
+    color: #1cb0f6;
+    border-color: #1cb0f6;
+}
+
+.edit-section {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 50px;
+    /* Espaço entre os flashcards */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+    font-weight: 900;
+    color: var(--secondary);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    border-bottom: 2px dashed #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.items-drop-zone[data-is-slide="true"] {
+    min-height: 150px;
+    border: 2px dashed #d1d5db;
+    background: #fdfdfd;
+}
+
+/* --- Estilos de Preview --- */
+
+/* Esconde as barras laterais e cabeçalho administrativo */
+body.preview-mode .toolbox, 
+body.preview-mode .properties-panel,
+body.preview-mode .admin-controls .control-group #add-slide,
+body.preview-mode .section-header,
+body.preview-mode .edit-controls,
+body.preview-mode .canvas-hint {
+    display: none !important;
+}
+
+/* Redimensiona o container principal para ocupar a tela toda */
+body.preview-mode .studio-container {
+    display: block; /* Remove o grid de 3 colunas */
+    background: #f0f2f5;
+    overflow: auto;
+}
+
+body.preview-mode #editor-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    height: 100vh;
+}
+
+/* Remove bordas e sombras de edição dos slides */
+body.preview-mode .edit-section {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+    margin-bottom: 80px; /* Espaço entre os flashcards no preview */
+}
+
+body.preview-mode .edit-wrapper {
+    margin-bottom: 20px;
+}
+
+body.preview-mode .edit-wrapper:hover {
+    box-shadow: none;
+    background: transparent;
+}
+
+/* Remove o tracejado das zonas de drop */
+body.preview-mode .items-drop-zone[data-is-slide="true"],
+body.preview-mode .drop-zone-nested {
+    border: none !important;
+    background: transparent !important;
+}

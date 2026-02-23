@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio | TrilhaDoDev</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/studio.css">
+</head>
+
+<body class="admin-page">
+
+    <header class="admin-controls">
+        <div class="logo">Studio<span>.</span>Dev</div>
+        <div class="control-group">            
+            <button id="add-slide" class="btn-next">
+                <i class="fa-solid fa-plus"></i> Novo Slide
+            </button>
+            <button id="export-json" class="btn-back"><i class="fa-solid fa-file-export"></i> Exportar JSON</button>
+            <button id="toggle-preview" class="btn-back">Ver Preview</button>
+        </div>
+    </header>
+
+    <div class="studio-container" style="display: flex; height: calc(100vh - 70px);">
+
+        <aside class="toolbox" style="width: 250px; background: white; border-right: 2px solid #ddd; padding: 20px;">
+            <h3 style="margin-bottom: 20px;">Elementos</h3>
+
+            <div class="draggable-item" data-type="terminal" draggable="true">
+                <i class="fa-solid fa-terminal"></i> Terminal Code
+            </div>
+
+            <div class="draggable-item" data-type="info" draggable="true">
+                <i class="fa-solid fa-circle-info"></i> Bloco de Info
+            </div>
+
+            <div class="draggable-item" data-type="quiz" draggable="true">
+                <i class="fa-solid fa-list-check"></i> Pergunta/Quiz
+            </div>
+
+            <div class="draggable-item" data-type="image" draggable="true">
+                <i class="fa-solid fa-image"></i> Imagem
+            </div>
+            <div class="draggable-item" data-type="list" draggable="true">
+                <i class="fa-solid fa-list-ul"></i> Lista de Tópicos
+            </div>
+
+            <h3 class="toolbox-title">Tipografia</h3>
+            <div class="draggable-item" data-type="title" draggable="true">
+                <i class="fa-solid fa-heading"></i> Título Principal
+            </div>
+            <div class="draggable-item" data-type="subtitle" draggable="true">
+                <i class="fa-solid fa-font"></i> Subtítulo
+            </div>
+            <div class="draggable-item" data-type="paragraph" draggable="true">
+                <i class="fa-solid fa-align-left"></i> Parágrafo
+            </div>
+
+            <h3 class="toolbox-title">Componentes</h3>
+            <div class="draggable-item" data-type="code-inline" draggable="true">
+                <i class="fa-solid fa-code"></i> Código Inline
+            </div>
+            <div class="draggable-item" data-type="badge" draggable="true">
+                <i class="fa-solid fa-tag"></i> Badge (Etiqueta)
+            </div>
+
+            <h3 class="toolbox-title">Layout</h3>
+            <div class="draggable-item" data-type="grid" draggable="true">
+                <i class="fa-solid fa-table-columns"></i> Colunas (Grid)
+            </div>
+
+            <h3 class="toolbox-title">Mídia</h3>
+            <div class="draggable-item" data-type="image" draggable="true">
+                <i class="fa-solid fa-image"></i> Imagem com URL
+            </div>
+        </aside>
+
+        <main id="editor-container" style="flex-grow: 1; overflow-y: auto; background: #f0f2f5; padding: 40px;">
+            <div id="slides-container">
+                </div>
+        </main>
+
+        <aside class="properties-panel"
+            style="width: 300px; background: white; border-left: 2px solid #ddd; padding: 20px;">
+            <h3>Propriedades</h3>
+            <div id="editor-fields">
+                <p style="font-size: 0.9rem; color: #666;">Selecione um elemento para editar cores e conteúdos.</p>
+            </div>
+            <div class="color-picker-group">
+                <h4>Cor do Texto Selecionado</h4>
+                <div style="display: flex; gap: 5px; margin-top: 10px;">
+                    <button onclick="Studio.applyColor('#58cc02')" class="color-dot"
+                        style="background: #58cc02;"></button>
+                    <button onclick="Studio.applyColor('#1cb0f6')" class="color-dot"
+                        style="background: #1cb0f6;"></button>
+                    <button onclick="Studio.applyColor('#ff4b4b')" class="color-dot"
+                        style="background: #ff4b4b;"></button>
+                    <button onclick="Studio.applyColor('#1f2937')" class="color-dot"
+                        style="background: #1f2937;"></button>
+                    <button onclick="Studio.applyColor('#6b7280')" class="color-dot"
+                        style="background: #6b7280;"></button>
+                </div>
+                <div class="text-editor-tools">
+                    <h4>Estilo de Texto</h4>
+                    <div class="btn-group-studio">
+                        <button onclick="document.execCommand('bold', false, null)" title="Negrito"><b>B</b></button>
+                        <button onclick="document.execCommand('italic', false, null)" title="Itálico"><i>I</i></button>
+                        <button onclick="Studio.applyWeight('400')" title="Thin (Fino)">Thin</button>
+                        <button onclick="Studio.applyWeight('900')" title="Extra Bold">Black</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="js/studio-engine.js"></script>
+</body>
+
+</html>
