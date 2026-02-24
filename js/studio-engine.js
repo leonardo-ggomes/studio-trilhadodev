@@ -79,9 +79,9 @@ const Studio = {
             <code class="code-block" contenteditable="true" style="display:inline-block">console.log("Olá Mundo!");</code>
         </div>`,
 
-        badge: (id) => `
+       badge: (id) => `
         <div class="tech-badge animate-pop" data-id="${id}" data-type="badge" style="display:inline-flex; gap: 8px; align-items: center;">
-            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star" data-prop="icon"></i>
             <span contenteditable="true">Importante</span>
         </div>`,
 
@@ -157,15 +157,29 @@ const Studio = {
         `;
         }
 
-        if (type === 'badge') {
+       if (type === 'badge') {
             const hasFlat = this.selectedElement.classList.contains('badge-flat');
-            html += `
-            <label>Estilo do Badge:</label>
-            <select onchange="Studio.updateProp('badge-style', this.value)">
-                <option value="3d" ${!hasFlat ? 'selected' : ''}>Padrão 3D (Branco)</option>
-                <option value="flat" ${hasFlat ? 'selected' : ''}>Apenas Ícone (Flat)</option>
-            </select>
+            // Pegamos a classe atual do ícone para mostrar no input
+            const currentIcon = this.selectedElement.querySelector('i').className;
             
+            html += `
+                <label>Estilo do Badge:</label>
+                <select onchange="Studio.updateProp('badge-style', this.value)" style="margin-bottom: 15px;">
+                    <option value="3d" ${!hasFlat ? 'selected' : ''}>Padrão 3D (Branco)</option>
+                    <option value="flat" ${hasFlat ? 'selected' : ''}>Apenas Ícone (Flat)</option>
+                </select>
+
+                <label>Classe do Ícone (FontAwesome):</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" 
+                        value="${currentIcon}" 
+                        oninput="Studio.updateBadgeIcon(this.value)"
+                        style="flex-grow: 1;">
+                    <a href="https://fontawesome.com/search?m=free" target="_blank" 
+                    style="padding: 8px; background: #eee; border-radius: 4px; color: #333;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    </a>
+                </div>
             `;
         }
 
@@ -228,6 +242,14 @@ const Studio = {
         this.selectedElement = el;
         const type = el.dataset.type;
         this.renderProperties(type);
+    },
+
+    updateBadgeIcon(iconClass) {
+        if (!this.selectedElement) return;
+        const iconElement = this.selectedElement.querySelector('i');
+        if (iconElement) {
+            iconElement.className = iconClass;
+        }
     },
 
     updateQuizCorrect(index) {
