@@ -328,74 +328,81 @@ const Studio = {
     },
 
     exportToJSON() {
-        const slides = this.slidesContainer.querySelectorAll('.edit-section');
-        let finalQuiz = null; // Para armazenar o quiz se encontrado
-        const flashcardsData = [];
+    const slides = this.slidesContainer.querySelectorAll('.edit-section');
+    let finalQuiz = null; 
+    const flashcardsData = [];
 
-        slides.forEach((slide, index) => {
-            const dropZone = slide.querySelector('.items-drop-zone');
-            const wrappers = dropZone.querySelectorAll(':scope > .edit-wrapper');
-            let slideHtml = "";
+    slides.forEach((slide, index) => {
+        const dropZone = slide.querySelector('.items-drop-zone');
+        const wrappers = dropZone.querySelectorAll(':scope > .edit-wrapper');
+        let slideHtml = "";
 
-            wrappers.forEach(wrap => {
-                const element = wrap.querySelector('[data-id]');
-                if (!element) return;
+        wrappers.forEach(wrap => {
+            const element = wrap.querySelector('[data-id]');
+            if (!element) return;
 
-                // Se for um componente do tipo QUIZ, vamos extrair os dados e não colocar no HTML
-                if (element.dataset.type === 'quiz') {
-                    const options = [];
-                    element.querySelectorAll('.option-item').forEach((opt, i) => {
-                        const letter = String.fromCharCode(65 + i); // A, B, C...
-                        const text = opt.querySelector('.option-text').innerText;
+            if (element.dataset.type === 'quiz') {
+                const options = [];
+                element.querySelectorAll('.option-item').forEach((opt, i) => {
+                    const letter = String.fromCharCode(65 + i);
+                    const text = opt.querySelector('.option-text').innerText;
 
-                        // Verificamos se a opção não está vazia/padrão
-                        if (text !== "Clique para editar") {
-                            options.push({
-                                ordem: letter,
-                                descricao: text,
-                                correta: opt.getAttribute('data-correct') === 'true',
-                                feedback: opt.getAttribute('data-correct') === 'true'
-                                    ? (element.getAttribute('data-feedback-success') || "Correto!")
-                                    : (element.getAttribute('data-feedback-error') || "Tente novamente.")
-                            });
-                        }
-                    });
+                    if (text !== "Clique para editar") {
+                        options.push({
+                            ordem: letter,
+                            descricao: text,
+                            correta: opt.getAttribute('data-correct') === 'true',
+                            feedback: opt.getAttribute('data-correct') === 'true'
+                                ? (element.getAttribute('data-feedback-success') || "Correto!")
+                                : (element.getAttribute('data-feedback-error') || "Tente novamente.")
+                        });
+                    }
+                });
 
-                    finalQuiz = {
-                        title: element.querySelector('.quiz-question').innerText,
-                        descricao: element.querySelector('.quiz-description').innerText,
-                        opcoes: options
-                    };
-                } else {
-                    // Se NÃO for quiz, processa como HTML normal para flashcards
-                    const clone = element.cloneNode(true);
-                    clone.classList.remove('animate-pop', 'selected-edit');
-                    clone.removeAttribute('contenteditable');
-                    clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+                finalQuiz = {
+                    title: element.querySelector('.quiz-question').innerText,
+                    descricao: element.querySelector('.quiz-description').innerText,
+                    opcoes: options
+                };
+            } else {
+                // --- ALTERAÇÃO AQUI PARA REMOVER A LIXEIRA ---
+                const clone = element.cloneNode(true);
+                
+                // 1. Remove classes de edição
+                clone.classList.remove('animate-pop', 'selected-edit');
+                clone.removeAttribute('contenteditable');
+                
+                // 2. Remove botões de controle (lixeira) se por acaso estiverem dentro do clone
+                const controls = clone.querySelector('.edit-controls');
+                if (controls) controls.remove();
 
-                    slideHtml += clone.outerHTML;
-                }
-            });
+                // 3. Limpa atributos de edição de todos os filhos
+                clone.querySelectorAll('[contenteditable]').forEach(el => {
+                    el.removeAttribute('contenteditable');
+                    el.removeAttribute('spellcheck');
+                });
 
-            // Só adiciona ao array se o slide tiver conteúdo HTML (evita slides que só tinham o quiz)
-            if (slideHtml.trim() !== "") {
-                flashcardsData.push({ html: slideHtml.replace(/\s+/g, ' ').trim() });
+                slideHtml += clone.outerHTML;
             }
         });
 
-        // ESTRUTURA FINAL CONFORME SUA SOLICITAÇÃO
-        const finalOutput = {
-            id: "aula-" + Date.now(),
-            title: document.getElementById('lesson-title-input')?.value || "Nova Aula",
-            icone: "fa-solid fa-code", // Padrão ou pegue de um input
-            banner_class: "logic",     // Padrão ou pegue de um input
-            flashcards: flashcardsData,
-            quiz: finalQuiz,
-            item_ordem: 1
-        };
+        if (slideHtml.trim() !== "") {
+            flashcardsData.push({ html: slideHtml.replace(/\s+/g, ' ').trim() });
+        }
+    });
 
-        this.downloadJSON(finalOutput);
-    },
+    const finalOutput = {
+        id: "aula-" + Date.now(),
+        title: document.getElementById('lesson-title-input')?.value || "Nova Aula",
+        icone: "fa-solid fa-code", 
+        banner_class: "logic",     
+        flashcards: flashcardsData,
+        quiz: finalQuiz,
+        item_ordem: 1
+    };
+
+    this.downloadJSON(finalOutput);
+},
 
     downloadJSON(obj) {
         const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
