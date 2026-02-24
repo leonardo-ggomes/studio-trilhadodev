@@ -82,7 +82,7 @@ const Studio = {
        badge: (id) => `
         <div class="tech-badge animate-pop" data-id="${id}" data-type="badge" style="display:inline-flex; gap: 8px; align-items: center;">
             <i class="fa-solid fa-star" data-prop="icon"></i>
-            <span contenteditable="true">Importante</span>
+            <span contenteditable="true">Bagde</span>
         </div>`,
 
         grid: (id) => `
@@ -157,9 +157,8 @@ const Studio = {
         `;
         }
 
-       if (type === 'badge') {
+        if (type === 'badge') {
             const hasFlat = this.selectedElement.classList.contains('badge-flat');
-            // Pegamos a classe atual do ícone para mostrar no input
             const currentIcon = this.selectedElement.querySelector('i').className;
             
             html += `
@@ -170,13 +169,15 @@ const Studio = {
                 </select>
 
                 <label>Classe do Ícone (FontAwesome):</label>
-                <div style="display: flex; gap: 5px;">
+                <div style="position: relative; display: flex; align-items: center;">
                     <input type="text" 
                         value="${currentIcon}" 
                         oninput="Studio.updateBadgeIcon(this.value)"
-                        style="flex-grow: 1;">
+                        style="width: 100%; padding-right: 30px;">
+                    
                     <a href="https://fontawesome.com/search?m=free" target="_blank" 
-                    style="padding: 8px; background: #eee; border-radius: 4px; color: #333;">
+                    title="Procurar ícones"
+                    style="position: absolute; top: 27%; right: 10px; color: #aaa; text-decoration: none; font-size: 0.9rem;">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     </a>
                 </div>
