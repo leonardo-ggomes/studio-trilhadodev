@@ -332,18 +332,20 @@ const Studio = {
         const id = 'comp_' + Date.now();
         const wrapper = document.createElement('div');
         wrapper.className = 'edit-wrapper';
+
+        // IMPORTANTE: O conteúdo do template agora é o primeiro filho, 
+        // e os controles são o segundo.
         wrapper.innerHTML = `
-            <div class="edit-controls small">
-                <button class="btn-delete-item"><i class="fa-solid fa-trash"></i></button>
-            </div>
-            ${this.templates[type](id)}`;
+        ${this.templates[type](id)}
+        <div class="edit-controls small">
+            <button class="btn-delete-item"><i class="fa-solid fa-trash"></i></button>
+        </div>`;
 
         wrapper.querySelector('.btn-delete-item').onclick = (e) => {
             e.stopPropagation();
             wrapper.remove();
         };
 
-        // Limpa o hint
         const hint = targetContainer.querySelector('.canvas-hint');
         if (hint) hint.remove();
 
@@ -388,23 +390,30 @@ const Studio = {
                         opcoes: options
                     };
                 } else {
-                    // --- ALTERAÇÃO AQUI PARA REMOVER A LIXEIRA ---
+                    // Pegamos o elemento de conteúdo real
+                    const element = wrap.querySelector('[data-id]');
+                    if (!element) return;
+
+                    // Criamos o clone para limpeza
                     const clone = element.cloneNode(true);
 
-                    // 1. Remove classes de edição
+                    // REMOÇÃO AGRESSIVA DE CONTROLES
+                    // Isso remove caso a lixeira tenha entrado dentro ou esteja colada no elemento
+                    const controls = clone.querySelectorAll('.edit-controls, .btn-delete-item, .section-header');
+                    controls.forEach(c => c.remove());
+
+                    // Limpeza de atributos de edição
                     clone.classList.remove('animate-pop', 'selected-edit');
                     clone.removeAttribute('contenteditable');
 
-                    // 2. Remove botões de controle (lixeira) se por acaso estiverem dentro do clone
-                    const controls = clone.querySelector('.edit-controls');
-                    if (controls) controls.remove();
-
-                    // 3. Limpa atributos de edição de todos os filhos
-                    clone.querySelectorAll('[contenteditable]').forEach(el => {
+                    // Limpa todos os filhos
+                    clone.querySelectorAll('[contenteditable], [spellcheck]').forEach(el => {
                         el.removeAttribute('contenteditable');
                         el.removeAttribute('spellcheck');
+                        el.classList.remove('selected-edit');
                     });
 
+                    // Adiciona ao HTML do slide
                     slideHtml += clone.outerHTML;
                 }
             });
