@@ -79,7 +79,7 @@ const Studio = {
             <code class="code-block" contenteditable="true" style="display:inline-block">console.log("Olá Mundo!");</code>
         </div>`,
 
-       badge: (id) => `
+        badge: (id) => `
         <div class="tech-badge animate-pop" data-id="${id}" data-type="badge" style="display:inline-flex; gap: 8px; align-items: center;">
             <i class="fa-solid fa-star" data-prop="icon"></i>
             <span contenteditable="true">Bagde</span>
@@ -160,7 +160,7 @@ const Studio = {
         if (type === 'badge') {
             const hasFlat = this.selectedElement.classList.contains('badge-flat');
             const currentIcon = this.selectedElement.querySelector('i').className;
-            
+
             html += `
                 <label>Estilo do Badge:</label>
                 <select onchange="Studio.updateProp('badge-style', this.value)" style="margin-bottom: 15px;">
@@ -351,81 +351,81 @@ const Studio = {
     },
 
     exportToJSON() {
-    const slides = this.slidesContainer.querySelectorAll('.edit-section');
-    let finalQuiz = null; 
-    const flashcardsData = [];
+        const slides = this.slidesContainer.querySelectorAll('.edit-section');
+        let finalQuiz = null;
+        const flashcardsData = [];
 
-    slides.forEach((slide, index) => {
-        const dropZone = slide.querySelector('.items-drop-zone');
-        const wrappers = dropZone.querySelectorAll(':scope > .edit-wrapper');
-        let slideHtml = "";
+        slides.forEach((slide, index) => {
+            const dropZone = slide.querySelector('.items-drop-zone');
+            const wrappers = dropZone.querySelectorAll(':scope > .edit-wrapper');
+            let slideHtml = "";
 
-        wrappers.forEach(wrap => {
-            const element = wrap.querySelector('[data-id]');
-            if (!element) return;
+            wrappers.forEach(wrap => {
+                const element = wrap.querySelector('[data-id]');
+                if (!element) return;
 
-            if (element.dataset.type === 'quiz') {
-                const options = [];
-                element.querySelectorAll('.option-item').forEach((opt, i) => {
-                    const letter = String.fromCharCode(65 + i);
-                    const text = opt.querySelector('.option-text').innerText;
+                if (element.dataset.type === 'quiz') {
+                    const options = [];
+                    element.querySelectorAll('.option-item').forEach((opt, i) => {
+                        const letter = String.fromCharCode(65 + i);
+                        const text = opt.querySelector('.option-text').innerText;
 
-                    if (text !== "Clique para editar") {
-                        options.push({
-                            ordem: letter,
-                            descricao: text,
-                            correta: opt.getAttribute('data-correct') === 'true',
-                            feedback: opt.getAttribute('data-correct') === 'true'
-                                ? (element.getAttribute('data-feedback-success') || "Correto!")
-                                : (element.getAttribute('data-feedback-error') || "Tente novamente.")
-                        });
-                    }
-                });
+                        if (text !== "Clique para editar") {
+                            options.push({
+                                ordem: letter,
+                                descricao: text,
+                                correta: opt.getAttribute('data-correct') === 'true',
+                                feedback: opt.getAttribute('data-correct') === 'true'
+                                    ? (element.getAttribute('data-feedback-success') || "Correto!")
+                                    : (element.getAttribute('data-feedback-error') || "Tente novamente.")
+                            });
+                        }
+                    });
 
-                finalQuiz = {
-                    title: element.querySelector('.quiz-question').innerText,
-                    descricao: element.querySelector('.quiz-description').innerText,
-                    opcoes: options
-                };
-            } else {
-                // --- ALTERAÇÃO AQUI PARA REMOVER A LIXEIRA ---
-                const clone = element.cloneNode(true);
-                
-                // 1. Remove classes de edição
-                clone.classList.remove('animate-pop', 'selected-edit');
-                clone.removeAttribute('contenteditable');
-                
-                // 2. Remove botões de controle (lixeira) se por acaso estiverem dentro do clone
-                const controls = clone.querySelector('.edit-controls');
-                if (controls) controls.remove();
+                    finalQuiz = {
+                        title: element.querySelector('.quiz-question').innerText,
+                        descricao: element.querySelector('.quiz-description').innerText,
+                        opcoes: options
+                    };
+                } else {
+                    // --- ALTERAÇÃO AQUI PARA REMOVER A LIXEIRA ---
+                    const clone = element.cloneNode(true);
 
-                // 3. Limpa atributos de edição de todos os filhos
-                clone.querySelectorAll('[contenteditable]').forEach(el => {
-                    el.removeAttribute('contenteditable');
-                    el.removeAttribute('spellcheck');
-                });
+                    // 1. Remove classes de edição
+                    clone.classList.remove('animate-pop', 'selected-edit');
+                    clone.removeAttribute('contenteditable');
 
-                slideHtml += clone.outerHTML;
+                    // 2. Remove botões de controle (lixeira) se por acaso estiverem dentro do clone
+                    const controls = clone.querySelector('.edit-controls');
+                    if (controls) controls.remove();
+
+                    // 3. Limpa atributos de edição de todos os filhos
+                    clone.querySelectorAll('[contenteditable]').forEach(el => {
+                        el.removeAttribute('contenteditable');
+                        el.removeAttribute('spellcheck');
+                    });
+
+                    slideHtml += clone.outerHTML;
+                }
+            });
+
+            if (slideHtml.trim() !== "") {
+                flashcardsData.push({ html: slideHtml.replace(/\s+/g, ' ').trim() });
             }
         });
 
-        if (slideHtml.trim() !== "") {
-            flashcardsData.push({ html: slideHtml.replace(/\s+/g, ' ').trim() });
-        }
-    });
+        const finalOutput = {
+            id: "aula-" + Date.now(),
+            title: document.getElementById('lesson-title-input')?.value || "Nova Aula",
+            icone: "fa-solid fa-code",
+            banner_class: "logic",
+            flashcards: flashcardsData,
+            quiz: finalQuiz,
+            item_ordem: 1
+        };
 
-    const finalOutput = {
-        id: "aula-" + Date.now(),
-        title: document.getElementById('lesson-title-input')?.value || "Nova Aula",
-        icone: "fa-solid fa-code", 
-        banner_class: "logic",     
-        flashcards: flashcardsData,
-        quiz: finalQuiz,
-        item_ordem: 1
-    };
-
-    this.downloadJSON(finalOutput);
-},
+        this.downloadJSON(finalOutput);
+    },
 
     downloadJSON(obj) {
         const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
