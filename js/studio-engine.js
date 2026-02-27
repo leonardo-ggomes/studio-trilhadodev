@@ -90,7 +90,18 @@ const Studio = {
                 data-id="${id}" 
                 data-type="grid" 
                 style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; min-height: 120px;">
-                </div>`
+                </div>`,
+
+        'table': (id) => `
+        <div class="modern-table-container animate-pop" data-id="${id}" data-type="table">
+            <div class="table-grid-wrapper drop-zone-nested" 
+                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; background: #e5e5e5; border: 2px solid #e5e5e5; border-radius: 12px; overflow: hidden;">
+                <div class="table-cell" style="background: white; padding: 10px; min-height: 50px;" contenteditable="true">Cabeçalho 1</div>
+                <div class="table-cell" style="background: white; padding: 10px; min-height: 50px;" contenteditable="true">Cabeçalho 2</div>
+                <div class="table-cell" style="background: white; padding: 10px; min-height: 50px;" contenteditable="true">Dado 1</div>
+                <div class="table-cell" style="background: white; padding: 10px; min-height: 50px;" contenteditable="true">Dado 2</div>
+            </div>
+        </div>`
     },
 
     init() {
@@ -105,6 +116,12 @@ const Studio = {
         if (this.slidesContainer.children.length === 0) {
             this.addSlide();
         }
+
+        document.querySelectorAll('.draggable-item').forEach(tool => {
+            tool.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('type', tool.dataset.type);
+            });
+        });
 
         // BIND DOS BOTÕES - Verifique se os IDs batem com o HTML
         const btnExport = document.getElementById('export-json');
@@ -213,6 +230,73 @@ const Studio = {
                     </a>
                 </div>
             `;
+        }
+
+        if (type === 'table') {
+            const grid = this.selectedElement.querySelector('.table-grid-wrapper');
+            const currentCols = grid.style.gridTemplateColumns.split(' ').length;
+            const totalCells = grid.querySelectorAll('.table-cell').length;
+            const currentRows = totalCells / currentCols;
+
+            html += `
+    <div class="duo-property-group" style="font-family: 'din-round', sans-serif;">
+        <div class="duo-stepper-container" style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: 700; color: #4b4b4b; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.8px;">
+                Colunas <span style="color: #1cb0f6; float: right;">${currentCols}</span>
+            </label>
+            <div style="display: flex; background: #f7f7f7; border: 2px solid #e5e5e5; border-radius: 16px; padding: 4px; align-items: center;">
+                <button onclick="Studio.updateTable('cols', -1)" class="btn-duo-step">-</button>
+                <div style="flex: 1; text-align: center; font-weight: bold; color: #777;">Ajustar largura</div>
+                <button onclick="Studio.updateTable('cols', 1)" class="btn-duo-step">+</button>
+            </div>
+        </div>
+
+        <div class="duo-stepper-container" style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: 700; color: #4b4b4b; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.8px;">
+                Linhas <span style="color: #1cb0f6; float: right;">${currentRows}</span>
+            </label>
+            <div style="display: flex; background: #f7f7f7; border: 2px solid #e5e5e5; border-radius: 16px; padding: 4px; align-items: center;">
+                <button onclick="Studio.updateTable('rows', -1)" class="btn-duo-step">-</button>
+                <div style="flex: 1; text-align: center; font-weight: bold; color: #777;">Ajustar altura</div>
+                <button onclick="Studio.updateTable('rows', 1)" class="btn-duo-step">+</button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; background: #e1f5fe; padding: 12px; border-radius: 12px; border: 2px solid #b3e5fc;">
+            <i class="fa-solid fa-lightbulb" style="color: #03a9f4;"></i>
+            <small style="color: #0288d1; font-weight: 600; line-height: 1.2;">
+                Dica: Arraste badges para dentro das células para decorar sua tabela!
+            </small>
+        </div>
+    </div>
+
+    <style>
+        .btn-duo-step {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-bottom: 4px solid #e5e5e5;
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #afafaf;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-duo-step:hover {
+            background: #fff;
+            filter: brightness(0.98);
+        }
+        .btn-duo-step:active {
+            border-bottom-width: 2px;
+            transform: translateY(2px);
+        }
+    </style>
+`;
         }
 
         if (type === 'quiz') {
@@ -387,7 +471,12 @@ const Studio = {
             const gridTarget = e.target.closest('.drop-zone-nested:not([data-is-slide])');
             const slideTarget = e.target.closest('.items-drop-zone[data-is-slide]');
 
-            if (gridTarget) {
+            const cellTarget = e.target.closest('.table-cell');
+            if (cellTarget) {
+                e.stopPropagation();
+                this.addComponent(type, cellTarget);
+            }
+            else if (gridTarget) {
                 e.stopPropagation();
                 this.addComponent(type, gridTarget);
             } else if (slideTarget) {
@@ -400,6 +489,38 @@ const Studio = {
             const target = e.target.closest('[data-id]');
             if (target) this.selectElement(target);
         });
+    },
+
+    updateTable(type, change) {
+        const grid = this.selectedElement.querySelector('.table-grid-wrapper');
+        let cols = grid.style.gridTemplateColumns.split(' ').length;
+        let cells = Array.from(grid.querySelectorAll('.table-cell'));
+        let rows = cells.length / cols;
+
+        if (type === 'cols') {
+            cols = Math.max(1, cols + change);
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        } else {
+            rows = Math.max(1, rows + change);
+        }
+
+        // Re-sincroniza o número de células
+        const targetCount = cols * rows;
+
+        if (cells.length < targetCount) {
+            for (let i = cells.length; i < targetCount; i++) {
+                const newCell = document.createElement('div');
+                newCell.className = 'table-cell drop-zone-nested';
+                newCell.style.cssText = "background: white; padding: 10px; min-height: 50px;";
+                newCell.setAttribute('contenteditable', 'true');
+                grid.appendChild(newCell);
+            }
+        } else if (cells.length > targetCount) {
+            for (let i = cells.length; i > targetCount; i--) {
+                grid.lastElementChild.remove();
+            }
+        }
+        this.renderProperties('table'); // Atualiza os números no painel
     },
 
     updateProp(prop, value) {
@@ -576,13 +697,13 @@ const Studio = {
         const textArea = document.getElementById('json-textarea');
         textArea.select();
         document.execCommand('copy');
-        
+
         const btn = document.getElementById('btn-copy-json');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fa-solid fa-check"></i> COPIADO!';
         btn.style.color = '#58cc02';
         btn.style.borderColor = '#58cc02';
-        
+
         setTimeout(() => {
             btn.innerHTML = originalText;
             btn.style.color = '#777';
@@ -627,11 +748,11 @@ const Studio = {
                     };
                 } else {
                     const clone = element.cloneNode(true);
-                    
+
                     // Limpeza rigorosa
                     clone.querySelectorAll('.edit-controls, .btn-delete-item, .section-header').forEach(c => c.remove());
                     clone.classList.remove('animate-pop', 'selected-edit');
-                    
+
                     // Remove atributos de edição de todos os níveis
                     const clearAttributes = (el) => {
                         el.removeAttribute('contenteditable');
