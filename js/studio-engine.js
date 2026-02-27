@@ -98,6 +98,9 @@ const Studio = {
         this.propPanel = document.getElementById('editor-fields');
         this.editorContainer = document.getElementById('editor-container');
 
+        const btnView = document.getElementById('view-json');
+        if (btnView) btnView.onclick = () => this.showJSON();
+
         // Garante que o primeiro slide exista
         if (this.slidesContainer.children.length === 0) {
             this.addSlide();
@@ -488,87 +491,8 @@ const Studio = {
     },
 
     exportToJSON() {
-        const slides = this.slidesContainer.querySelectorAll('.edit-section');
-        let finalQuiz = null;
-        const flashcardsData = [];
-
-        slides.forEach((slide, index) => {
-            const dropZone = slide.querySelector('.items-drop-zone');
-            const wrappers = dropZone.querySelectorAll(':scope > .edit-wrapper');
-            let slideHtml = "";
-
-            wrappers.forEach(wrap => {
-                const element = wrap.querySelector('[data-id]');
-                if (!element) return;
-
-                if (element.dataset.type === 'quiz') {
-                    const options = [];
-                    element.querySelectorAll('.option-item').forEach((opt, i) => {
-                        const letter = String.fromCharCode(65 + i);
-                        const text = opt.querySelector('.option-text').innerText;
-
-                        if (text !== "Clique para editar") {
-                            options.push({
-                                ordem: letter,
-                                descricao: text,
-                                correta: opt.getAttribute('data-correct') === 'true',
-                                feedback: opt.getAttribute('data-correct') === 'true'
-                                    ? (element.getAttribute('data-feedback-success') || "Correto!")
-                                    : (element.getAttribute('data-feedback-error') || "Tente novamente.")
-                            });
-                        }
-                    });
-
-                    finalQuiz = {
-                        title: element.querySelector('.quiz-question').innerText,
-                        descricao: element.querySelector('.quiz-description').innerText,
-                        opcoes: options
-                    };
-                } else {
-                    // Pegamos o elemento de conteúdo real
-                    const element = wrap.querySelector('[data-id]');
-                    if (!element) return;
-
-                    // Criamos o clone para limpeza
-                    const clone = element.cloneNode(true);
-
-                    // REMOÇÃO AGRESSIVA DE CONTROLES
-                    // Isso remove caso a lixeira tenha entrado dentro ou esteja colada no elemento
-                    const controls = clone.querySelectorAll('.edit-controls, .btn-delete-item, .section-header');
-                    controls.forEach(c => c.remove());
-
-                    // Limpeza de atributos de edição
-                    clone.classList.remove('animate-pop', 'selected-edit');
-                    clone.removeAttribute('contenteditable');
-
-                    // Limpa todos os filhos
-                    clone.querySelectorAll('[contenteditable], [spellcheck]').forEach(el => {
-                        el.removeAttribute('contenteditable');
-                        el.removeAttribute('spellcheck');
-                        el.classList.remove('selected-edit');
-                    });
-
-                    // Adiciona ao HTML do slide
-                    slideHtml += clone.outerHTML;
-                }
-            });
-
-            if (slideHtml.trim() !== "") {
-                flashcardsData.push({ html: slideHtml.replace(/\s+/g, ' ').trim() });
-            }
-        });
-
-        const finalOutput = {
-            id: "aula-" + Date.now(),
-            title: document.getElementById('lesson-title-input')?.value || "Nova Aula",
-            icone: "fa-solid fa-code",
-            banner_class: "logic",
-            flashcards: flashcardsData,
-            quiz: finalQuiz,
-            item_ordem: 1
-        };
-
-        this.downloadJSON(finalOutput);
+        const data = this.generateData();
+        this.downloadJSON(data);
     },
 
     downloadJSON(obj) {
@@ -620,6 +544,128 @@ const Studio = {
                 }
             });
         }
+    },
+    showJSON() {
+        const data = this.generateData();
+        const jsonString = JSON.stringify(data, null, 2);
+
+        const modalHtml = `
+            <div id="json-modal-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; z-index:9999; backdrop-filter: blur(5px);">
+                <div class="animate-pop" style="background:white; width:85%; max-width:900px; max-height:85vh; border-radius:24px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.2); border: 2px solid #e5e5e5;">
+                    <div style="padding: 20px 25px; border-bottom: 2px solid #e5e5e5; display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0; color:#4b4b4b; font-size: 1.2rem;"><i class="fa-solid fa-code" style="color:#1cb0f6; margin-right:10px;"></i>JSON Estruturado</h3>
+                        <button onclick="document.getElementById('json-modal-overlay').remove()" style="background:none; border:none; font-size:1.8rem; cursor:pointer; color:#ccc;">&times;</button>
+                    </div>
+                    <div style="flex:1; overflow:auto; padding:0; background:#ffffff;">
+                        <textarea readonly id="json-textarea" style="width:100%; height:100%; min-height:400px; border:none; background:transparent; color:#000000; padding:20px; font-family: 'Consolas', 'Monaco', monospace; font-size:14px; resize:none; outline:none; line-height:1.5;">${jsonString}</textarea>
+                    </div>
+                    <div style="padding:15px 25px; border-top: 2px solid #e5e5e5; display:flex; gap:12px; justify-content:flex-end; background:#fff;">
+                        <button id="btn-copy-json" onclick="Studio.copyToClipboard()" style="background:#fff; border:2px solid #e5e5e5; border-bottom:4px solid #e5e5e5; padding:12px 24px; border-radius:14px; cursor:pointer; font-weight:bold; color:#777; font-size:13px;">
+                            <i class="fa-solid fa-copy"></i> COPIAR TUDO
+                        </button>
+                        <button onclick="document.getElementById('json-modal-overlay').remove()" style="background:#58cc02; border:none; border-bottom:4px solid #46a302; padding:12px 30px; border-radius:14px; cursor:pointer; color:white; font-weight:bold; font-size:13px; letter-spacing:0.5px;">
+                            ENTENDI
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+    copyToClipboard() {
+        const textArea = document.getElementById('json-textarea');
+        textArea.select();
+        document.execCommand('copy');
+        
+        const btn = document.getElementById('btn-copy-json');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> COPIADO!';
+        btn.style.color = '#58cc02';
+        btn.style.borderColor = '#58cc02';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.color = '#777';
+            btn.style.borderColor = '#e5e5e5';
+        }, 2000);
+    },
+    generateData() {
+        const slides = this.slidesContainer.querySelectorAll('.edit-section');
+        let finalQuiz = null;
+        const flashcardsData = [];
+
+        slides.forEach((slide) => {
+            const dropZone = slide.querySelector('.items-drop-zone');
+            const wrappers = dropZone.querySelectorAll(':scope > .edit-wrapper');
+            let slideHtml = "";
+
+            wrappers.forEach(wrap => {
+                const element = wrap.querySelector('[data-id]');
+                if (!element) return;
+
+                if (element.dataset.type === 'quiz') {
+                    const options = [];
+                    element.querySelectorAll('.option-item').forEach((opt, i) => {
+                        const letter = String.fromCharCode(65 + i);
+                        const text = opt.querySelector('.option-text').innerText;
+                        if (text !== "Clique para editar") {
+                            options.push({
+                                ordem: letter,
+                                descricao: text,
+                                correta: opt.getAttribute('data-correct') === 'true',
+                                feedback: opt.getAttribute('data-correct') === 'true'
+                                    ? (element.getAttribute('data-feedback-success') || "Correto!")
+                                    : (element.getAttribute('data-feedback-error') || "Tente novamente.")
+                            });
+                        }
+                    });
+
+                    finalQuiz = {
+                        title: element.querySelector('.quiz-question').innerText,
+                        descricao: element.querySelector('.quiz-description').innerText,
+                        opcoes: options
+                    };
+                } else {
+                    const clone = element.cloneNode(true);
+                    
+                    // Limpeza rigorosa
+                    clone.querySelectorAll('.edit-controls, .btn-delete-item, .section-header').forEach(c => c.remove());
+                    clone.classList.remove('animate-pop', 'selected-edit');
+                    
+                    // Remove atributos de edição de todos os níveis
+                    const clearAttributes = (el) => {
+                        el.removeAttribute('contenteditable');
+                        el.removeAttribute('spellcheck');
+                        el.classList.remove('selected-edit', 'animate-pop');
+                        Array.from(el.children).forEach(clearAttributes);
+                    };
+                    clearAttributes(clone);
+
+                    // Transforma em string, remove quebras de linha e espaços duplos
+                    let cleanHtml = clone.outerHTML
+                        .replace(/\n/g, "")      // Remove quebras de linha
+                        .replace(/\s+/g, " ")    // Colapsa espaços múltiplos
+                        .replace(/>\s+</g, "><") // Remove espaços entre tags
+                        .trim();
+
+                    slideHtml += cleanHtml;
+                }
+            });
+
+            if (slideHtml.trim() !== "") {
+                flashcardsData.push({ html: slideHtml });
+            }
+        });
+
+        return {
+            id: "aula-" + Date.now(),
+            title: document.getElementById('lesson-title-input')?.value || "Nova Aula",
+            icone: "fa-solid fa-code",
+            banner_class: "logic",
+            flashcards: flashcardsData,
+            quiz: finalQuiz,
+            item_ordem: 1
+        };
     }
 
 
