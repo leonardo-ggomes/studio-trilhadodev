@@ -484,3 +484,62 @@ body.preview-mode .drop-zone-nested {
     border: none !important;
     background: transparent !important;
 }
+
+.color-dot {
+    width: 25px;
+    height: 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.1);
+    transition: transform 0.1s;
+}
+.color-dot:hover {
+    transform: scale(1.1);
+}
+
+input[type="color"] {
+    width: 100%;
+    height: 35px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #fff;
+    padding: 2px;
+    margin-top: 0px;
+}
+
+
+.color-input-min::-webkit-color-swatch-wrapper { padding: 0; }
+.color-input-min::-webkit-color-swatch { border: none; }
+
+/* Garante que o input tenha o mesmo tamanho do seu .color-dot */
+.color-input-min {
+    width: 25px !important;
+    height: 25px !important;
+    padding: 0 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 50% !important;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* Remove o preenchimento interno no Chrome/Edge/Safari */
+.color-input-min::-webkit-color-swatch-wrapper {
+    padding: 0 !important;
+    border-radius: 50%;
+}
+
+.color-input-min::-webkit-color-swatch {
+    border: none !important;
+    border-radius: 50%;
+}
+
+/* Para Firefox */
+.color-input-min::-moz-color-swatch {
+    border: none !important;
+    border-radius: 50%;
+}

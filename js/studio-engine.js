@@ -49,7 +49,7 @@ const Studio = {
 
         image: (id) => `
             <div class="card-image animate-pop" data-id="${id}" data-type="image">
-                <img src="https://via.placeholder.com/400x200?text=Clique+para+mudar+a+URL" 
+                <img src="../img/placehold.png" 
                     onclick="const url = prompt('Cole a URL da imagem:'); if(url) this.src=url;">
             </div>`,
 
@@ -75,7 +75,7 @@ const Studio = {
         </div>`,
 
         'code-inline': (id) => `
-        <div class="animate-pop" data-id="${id}" style="margin: 10px 0;">
+        <div class="animate-pop" data-id="${id}" data-type="code-inline" style="margin: 10px 0;">
             <code class="code-block" contenteditable="true" style="display:inline-block">console.log("Olá Mundo!");</code>
         </div>`,
 
@@ -141,12 +141,19 @@ const Studio = {
         let html = `<h4>Configurações (${type})</h4>`;
 
         if (type === 'image') {
-            const currentSrc = this.selectedElement.querySelector('img').src;
-            const currentWidth = this.selectedElement.querySelector('img').style.width || "100%";
+            const img = this.selectedElement.querySelector('img');
+            const currentSrc = img.src;
+            const currentWidth = img.style.width || "100%";
+            const currentRadius = img.style.borderRadius || "0px";
+
             html += `
             <label>URL da Imagem:</label>
             <input type="text" value="${currentSrc}" oninput="Studio.updateProp('img-src', this.value)">
             
+           <label>Arredondamento: <span id="radius-val">${currentRadius}</span></label>
+            <input type="range" min="0" max="150" value="${parseInt(currentRadius)}" 
+                oninput="Studio.updateProp('img-radius', this.value + 'px')">
+
             <label>Largura da Imagem (${currentWidth}):</label>
             <select onchange="Studio.updateProp('img-width', this.value)">
                 <option value="25%" ${currentWidth === '25%' ? 'selected' : ''}>Pequena (25%)</option>
@@ -155,6 +162,21 @@ const Studio = {
                 <option value="100%" ${currentWidth === '100%' ? 'selected' : ''}>Total (100%)</option>
             </select>
         `;
+        }
+
+        if (type === 'paragraph') {
+            const currentBg = this.selectedElement.style.backgroundColor || "transparent";
+
+            html += `
+            <label>Cor de Fundo do Parágrafo:</label>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px;">
+                <button class="color-dot" style="background:transparent; border:1px solid #ccc" onclick="Studio.updateProp('p-bg', 'transparent')"></button>
+                <button class="color-dot" style="background:#f0f7ff" onclick="Studio.updateProp('p-bg', '#f0f7ff')"></button>
+                <button class="color-dot" style="background:#fff4e5" onclick="Studio.updateProp('p-bg', '#fff4e5')"></button>
+                <button class="color-dot" style="background:#e7f9ee" onclick="Studio.updateProp('p-bg', '#e7f9ee')"></button>
+                <input type="color" value="${currentBg}" onchange="Studio.updateProp('p-bg', this.value)" style="width:30px; height:30px; border:none; padding:0;margin-top:-2px;">
+            </div>
+            <small>Ajuste o padding se necessário via CSS (card-text)</small>`;
         }
 
         if (type === 'badge') {
@@ -231,9 +253,69 @@ const Studio = {
     `;
         }
 
+        // Dentro de renderProperties(type)
+
+        if (type === 'code-inline') {
+            const codeEl = this.selectedElement.querySelector('code');
+            const currentCol = codeEl.style.color || "inherit";
+            const currentBg = codeEl.style.backgroundColor || "transparent";
+
+            html += `
+    <label>Cor do Código:</label>
+    <div class="color-grid" style="display: flex; gap: 5px; margin-bottom: 10px;">
+        <button class="color-dot" style="background:#e06c75" onclick="Studio.updateProp('code-color', '#e06c75')"></button>
+        <button class="color-dot" style="background:#98c379" onclick="Studio.updateProp('code-color', '#98c379')"></button>
+        <button class="color-dot" style="background:#61afef" onclick="Studio.updateProp('code-color', '#61afef')"></button>
+        <input type="color" value="${currentCol}" onchange="Studio.updateProp('code-color', this.value)" class="color-input-min">
+    </div>
+
+    <label>Fundo do Código:</label>
+    <div class="color-grid" style="display: flex; gap: 5px;">
+        <button class="color-dot" style="background:#282c34" onclick="Studio.updateProp('code-bg', '#282c34')"></button>
+        <button class="color-dot" style="background:#f0f0f0; border:1px solid #ccc" onclick="Studio.updateProp('code-bg', '#f0f0f0')"></button>
+        <button class="color-dot" style="background:transparent; border:1px solid #ccc" onclick="Studio.updateProp('code-bg', 'transparent')"></button>
+        <input type="color" value="${currentBg}" onchange="Studio.updateProp('code-bg', this.value)" class="color-input-min">
+    </div>`;
+        }
+
+        if (type === 'info') {
+    // Convertemos as cores atuais para Hex para o input reconhecer
+    const currentBg = this.rgbToHex(this.selectedElement.style.backgroundColor) || "#f0f7ff";
+    const currentBorder = this.rgbToHex(this.selectedElement.style.borderLeftColor) || "#007bff";
+
+    html += `
+    <label>Cor de Fundo (Info):</label>
+    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <button type="button" class="color-dot" style="background:#f0f7ff; border:1px solid #ddd" onclick="Studio.updateProp('info-bg', '#f0f7ff')"></button>
+        <button type="button" class="color-dot" style="background:#fff4e5; border:1px solid #ddd" onclick="Studio.updateProp('info-bg', '#fff4e5')"></button>
+        <input style="margin-top:20px;" type="color" value="${currentBg}" oninput="Studio.updateProp('info-bg', this.value)" class="color-input-min">
+    </div>
+    
+    <label>Cor da Borda e Ícone:</label>
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <button type="button" class="color-dot" style="background:#007bff" onclick="Studio.updateProp('info-border', '#007bff')"></button>
+        <button type="button" class="color-dot" style="background:#ff4b4b" onclick="Studio.updateProp('info-border', '#ff4b4b')"></button>
+        <input type="color" value="${currentBorder}" oninput="Studio.updateProp('info-border', this.value)" class="color-input-min" style="margin-top:20px;">
+    </div>
+    
+    <small style="display:block; margin-top:5px; color:#666">O ícone seguirá a cor da borda.</small>`;
+}
+
         this.propPanel.innerHTML = html;
     },
 
+    rgbToHex(rgb) {
+        if (!rgb || rgb === "transparent" || rgb === "inherit") return "#ffffff";
+        if (rgb.startsWith('#')) return rgb;
+        
+        const rgbValues = rgb.match(/\d+/g);
+        if (!rgbValues || rgbValues.length < 3) return "#ffffff";
+        
+        return "#" + rgbValues.slice(0, 3).map(x => {
+            const hex = parseInt(x).toString(16);
+            return hex.length === 1 ? "0" + hex : hex;
+        }).join("");
+    },
     updateGridCols(val) {
         if (this.selectedElement) {
             this.selectedElement.style.gridTemplateColumns = val;
@@ -323,6 +405,47 @@ const Studio = {
             } else {
                 this.selectedElement.classList.remove('badge-flat');
             }
+        }
+
+        if (prop === 'img-radius') {
+            const img = this.selectedElement.querySelector('img');
+            if (img) {
+                img.style.borderRadius = value;
+
+                const label = document.getElementById('radius-val');
+                if (label) label.innerText = value;
+            }
+        }
+
+        if (prop === 'p-bg') {
+            this.selectedElement.style.backgroundColor = value;
+
+            if (value !== 'transparent') {
+                this.selectedElement.style.padding = '15px';
+                this.selectedElement.style.borderRadius = '8px';
+            } else {
+                this.selectedElement.style.padding = '0';
+            }
+        }
+
+        if (prop === 'code-color') {
+            const code = this.selectedElement.querySelector('code');
+            if (code) code.style.color = value;
+        }
+        if (prop === 'code-bg') {
+            const code = this.selectedElement.querySelector('code');
+            if (code) code.style.backgroundColor = value;
+        }
+
+        // Lógica para Bloco Info
+        if (prop === 'info-bg') {
+            this.selectedElement.style.backgroundColor = value;
+        }
+        if (prop === 'info-border') {
+            this.selectedElement.style.borderLeftColor = value;
+            // Sincroniza a cor do ícone com a borda lateral para manter a harmonia
+            const icon = this.selectedElement.querySelector('.info-icon i');
+            if (icon) icon.style.color = value;
         }
     },
 
