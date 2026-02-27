@@ -168,13 +168,19 @@ const Studio = {
             const currentBg = this.selectedElement.style.backgroundColor || "transparent";
 
             html += `
-            <label>Cor de Fundo do Parágrafo:</label>
-            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px;">
-                <button class="color-dot" style="background:transparent; border:1px solid #ccc" onclick="Studio.updateProp('p-bg', 'transparent')"></button>
-                <button class="color-dot" style="background:#f0f7ff" onclick="Studio.updateProp('p-bg', '#f0f7ff')"></button>
-                <button class="color-dot" style="background:#fff4e5" onclick="Studio.updateProp('p-bg', '#fff4e5')"></button>
-                <button class="color-dot" style="background:#e7f9ee" onclick="Studio.updateProp('p-bg', '#e7f9ee')"></button>
-                <input type="color" value="${currentBg}" onchange="Studio.updateProp('p-bg', this.value)" style="width:30px; height:30px; border:none; padding:0;margin-top:-2px;">
+            <label>Cor de Fundo do Parágrafo (Estilo Duolingo):</label>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                <button class="color-dot" style="background:transparent; border:2px solid #e5e5e5; width:30px; height:30px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('p-bg', 'transparent')"></button>
+                
+                <button class="color-dot" title="Verde Duo" style="background:#58cc02; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('p-bg', '#58cc02')"></button>
+                
+                <button class="color-dot" title="Azul Céu" style="background:#1cb0f6; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('p-bg', '#1cb0f6')"></button>
+                
+                <button class="color-dot" title="Amarelo Sol" style="background:#ffc800; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('p-bg', '#ffc800')"></button>
+                
+                <button class="color-dot" title="Laranja Fogo" style="background:#ff9600; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('p-bg', '#ff9600')"></button>
+                
+                <input type="color" value="${currentBg}" onchange="Studio.updateProp('p-bg', this.value)" style="width:30px; height:30px; border:none; padding:0; cursor:pointer; background:none;">
             </div>
             <small>Ajuste o padding se necessário via CSS (card-text)</small>`;
         }
@@ -262,28 +268,34 @@ const Studio = {
 
             html += `
     <label>Cor do Código:</label>
-    <div class="color-grid" style="display: flex; gap: 5px; margin-bottom: 10px;">
-        <button class="color-dot" style="background:#e06c75" onclick="Studio.updateProp('code-color', '#e06c75')"></button>
-        <button class="color-dot" style="background:#98c379" onclick="Studio.updateProp('code-color', '#98c379')"></button>
-        <button class="color-dot" style="background:#61afef" onclick="Studio.updateProp('code-color', '#61afef')"></button>
-        <input type="color" value="${currentCol}" onchange="Studio.updateProp('code-color', this.value)" class="color-input-min">
+    <div class="color-grid" style="display: flex; gap: 8px; margin-bottom: 10px;">
+        <button class="color-dot" style="background:#1cb0f6; border:none; width:25px; height:25px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('code-color', '#1cb0f6')"></button>
+        
+        <button class="color-dot" style="background:#ce82ff; border:none; width:25px; height:25px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('code-color', '#ce82ff')"></button>
+        
+        <button class="color-dot" style="background:#4b4b4b; border:none; width:25px; height:25px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('code-color', '#4b4b4b')"></button>
+        
+        <input type="color" value="${currentCol}" onchange="Studio.updateProp('code-color', this.value)" class="color-input-min" style="width:25px; height:25px; border:none; background:none; cursor:pointer;">
     </div>
 
     <label>Fundo do Código:</label>
-    <div class="color-grid" style="display: flex; gap: 5px;">
-        <button class="color-dot" style="background:#282c34" onclick="Studio.updateProp('code-bg', '#282c34')"></button>
-        <button class="color-dot" style="background:#f0f0f0; border:1px solid #ccc" onclick="Studio.updateProp('code-bg', '#f0f0f0')"></button>
-        <button class="color-dot" style="background:transparent; border:1px solid #ccc" onclick="Studio.updateProp('code-bg', 'transparent')"></button>
-        <input type="color" value="${currentBg}" onchange="Studio.updateProp('code-bg', this.value)" class="color-input-min">
+    <div class="color-grid" style="display: flex; gap: 8px;">
+        <button class="color-dot" style="background:#141f23; border:none; width:25px; height:25px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('code-bg', '#141f23')"></button>
+        
+        <button class="color-dot" style="background:#f7f7f7; border:2px solid #e5e5e5; width:25px; height:25px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('code-bg', '#f7f7f7')"></button>
+        
+        <button class="color-dot" style="background:transparent; border:2px solid #e5e5e5; width:25px; height:25px; border-radius:50%; cursor:pointer;" onclick="Studio.updateProp('code-bg', 'transparent')"></button>
+        
+        <input type="color" value="${currentBg}" onchange="Studio.updateProp('code-bg', this.value)" class="color-input-min" style="width:25px; height:25px; border:none; background:none; cursor:pointer;">
     </div>`;
         }
 
         if (type === 'info') {
-    // Convertemos as cores atuais para Hex para o input reconhecer
-    const currentBg = this.rgbToHex(this.selectedElement.style.backgroundColor) || "#f0f7ff";
-    const currentBorder = this.rgbToHex(this.selectedElement.style.borderLeftColor) || "#007bff";
+            // Convertemos as cores atuais para Hex para o input reconhecer
+            const currentBg = this.rgbToHex(this.selectedElement.style.backgroundColor) || "#f0f7ff";
+            const currentBorder = this.rgbToHex(this.selectedElement.style.borderLeftColor) || "#007bff";
 
-    html += `
+            html += `
     <label>Cor de Fundo (Info):</label>
     <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
         <button type="button" class="color-dot" style="background:#f0f7ff; border:1px solid #ddd" onclick="Studio.updateProp('info-bg', '#f0f7ff')"></button>
@@ -299,7 +311,7 @@ const Studio = {
     </div>
     
     <small style="display:block; margin-top:5px; color:#666">O ícone seguirá a cor da borda.</small>`;
-}
+        }
 
         this.propPanel.innerHTML = html;
     },
@@ -307,10 +319,10 @@ const Studio = {
     rgbToHex(rgb) {
         if (!rgb || rgb === "transparent" || rgb === "inherit") return "#ffffff";
         if (rgb.startsWith('#')) return rgb;
-        
+
         const rgbValues = rgb.match(/\d+/g);
         if (!rgbValues || rgbValues.length < 3) return "#ffffff";
-        
+
         return "#" + rgbValues.slice(0, 3).map(x => {
             const hex = parseInt(x).toString(16);
             return hex.length === 1 ? "0" + hex : hex;
